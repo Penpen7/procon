@@ -92,36 +92,25 @@ signed main() {
   // C言語流の入出力は使用できない
   ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  string s, t;
-  cin >> s >> t;
-  int ssize = SIZE(s), tsize = SIZE(t);
-  // if (ssize > tsize) {
-  //   swap(s, t);
-  //   swap(ssize, tsize);
-  // }
-  vector<vector<int>> dp(ssize + 1, vector<int>(tsize + 1, 0));
-  repz(is, 1, ssize + 1) {
-    repz(it, 1, tsize + 1) {
-      if (s[is - 1] == t[it - 1]) chmax(dp[is][it], dp[is - 1][it - 1] + 1);
-      chmax(dp[is][it], dp[is - 1][it]);
-      chmax(dp[is][it], dp[is][it - 1]);
+  int n;
+  cin >> n;
+  vector<ld> p(n);
+  vector<vector<ld>> dp(n, vector<ld>(n + 1, 0e+0));
+  rep(i, n) { cin >> p[i]; }
+  dp[0][0] = 1 - p[0];
+  dp[0][1] = p[0];
+  repz(i, 1, n) {
+    repz(j, 0, n + 1) {
+      if (j > 0)
+        dp[i][j] = dp[i - 1][j - 1] * p[i] + dp[i - 1][j] * (1 - p[i]);
+      else
+        dp[i][j] = dp[i - 1][j] * (1 - p[i]);
     }
   }
-  int is = ssize, it = tsize;
-  vector<char> res;
-  while (is > 0 and it > 0) {
-    if (dp[is][it] == dp[is - 1][it]) {
-      is--;
-    } else if (dp[is][it] == dp[is][it - 1]) {
-      it--;
-    } else {
-      is--;
-      it--;
-      res.push_back(s[is]);
-    }
+  ld res = 0;
+  repz(i, n / 2 + 1, n + 1) {
+    res += dp[n - 1][i];
   }
-  reverse(ALL(res));
-  for (char i : res) cout << i;
-  cout << endl;
+  cout << fixed << setprecision(15) << res << endl;
   ret;
 }

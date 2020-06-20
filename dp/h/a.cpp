@@ -87,41 +87,63 @@ const ll mod = (int)1e+9 + 7;
 // 小文字97-122(+32)
 //  priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>
 //  ba;
+struct mint {
+  ll x;  // typedef long long ll;
+  mint(ll x = 0) : x((x % mod + mod) % mod) {}
+  mint operator-() const { return mint(-x); }
+  mint &operator+=(const mint a) {
+    if ((x += a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint &operator-=(const mint a) {
+    if ((x += mod - a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint &operator*=(const mint a) {
+    (x *= a.x) %= mod;
+    return *this;
+  }
+  mint operator+(const mint a) const { return mint(*this) += a; }
+  mint operator-(const mint a) const { return mint(*this) -= a; }
+  mint operator*(const mint a) const { return mint(*this) *= a; }
+  mint pow(ll t) const {
+    if (!t) return 1;
+    mint a = pow(t >> 1);
+    a *= a;
+    if (t & 1) a *= *this;
+    return a;
+  }
+
+  // for prime mod
+  mint inv() const { return pow(mod - 2); }
+  mint &operator/=(const mint a) { return *this *= a.inv(); }
+  mint operator/(const mint a) const { return mint(*this) /= a; }
+};
+istream &operator>>(istream &is, const mint &a) { return is >> a.x; }
+ostream &operator<<(ostream &os, const mint &a) { return os << a.x; }
+mint bfs(ll xsize, ll ysize, vector<vector<char>> a) {
+  vector<vector<mint>> dp(xsize, vector<mint>(ysize, 0));
+  dp[0][0] = 1;
+  for (int y = 0; y < ysize; y++) {
+    for (int x = 0; x < xsize; x++) {
+      if ((x == 0 and y == 0) or a[x][y] == '#') continue;
+      if (x - 1 >= 0) dp[x][y] += dp[x - 1][y];
+      if (y - 1 >= 0) dp[x][y] += dp[x][y - 1];
+    }
+  }
+  return dp[xsize - 1][ysize - 1];
+}
 signed main() {
   // faster
   // C言語流の入出力は使用できない
   ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  string s, t;
-  cin >> s >> t;
-  int ssize = SIZE(s), tsize = SIZE(t);
-  // if (ssize > tsize) {
-  //   swap(s, t);
-  //   swap(ssize, tsize);
-  // }
-  vector<vector<int>> dp(ssize + 1, vector<int>(tsize + 1, 0));
-  repz(is, 1, ssize + 1) {
-    repz(it, 1, tsize + 1) {
-      if (s[is - 1] == t[it - 1]) chmax(dp[is][it], dp[is - 1][it - 1] + 1);
-      chmax(dp[is][it], dp[is - 1][it]);
-      chmax(dp[is][it], dp[is][it - 1]);
-    }
+  int ysize, xsize;
+  cin >> ysize >> xsize;
+  vector<vector<char>> a(xsize, vector<char>(ysize));
+  rep(y, ysize) {
+    rep(x, xsize) { cin >> a[x][y]; }
   }
-  int is = ssize, it = tsize;
-  vector<char> res;
-  while (is > 0 and it > 0) {
-    if (dp[is][it] == dp[is - 1][it]) {
-      is--;
-    } else if (dp[is][it] == dp[is][it - 1]) {
-      it--;
-    } else {
-      is--;
-      it--;
-      res.push_back(s[is]);
-    }
-  }
-  reverse(ALL(res));
-  for (char i : res) cout << i;
-  cout << endl;
+  cout << bfs(xsize, ysize, a) << endl;
   ret;
 }

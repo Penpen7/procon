@@ -87,41 +87,58 @@ const ll mod = (int)1e+9 + 7;
 // 小文字97-122(+32)
 //  priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>
 //  ba;
+struct tsort {
+  int V;
+  vector<vector<int>> G;
+  vector<int> deg, res;
+  tsort(int node_size) : V(node_size), G(V), deg(V, 0) {}
+  void add_edge(int from, int to) {
+    G[from].push_back(to);
+    deg[to]++;
+  }
+  bool sort() {
+    queue<int> que;
+    for (int i = 0; i < V; i++) {
+      if (deg[i] == 0) {
+        que.push(i);
+      }
+    }
+    while (!que.empty()) {
+      int p = que.front();
+      que.pop();
+      res.push_back(p);
+      for (int v : G[p]) {
+        if (--deg[v] == 0) {
+          que.push(v);
+        }
+      }
+    }
+    return (*max_element(deg.begin(), deg.end()) == 0);
+  }
+};
 signed main() {
   // faster
   // C言語流の入出力は使用できない
   ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  string s, t;
-  cin >> s >> t;
-  int ssize = SIZE(s), tsize = SIZE(t);
-  // if (ssize > tsize) {
-  //   swap(s, t);
-  //   swap(ssize, tsize);
-  // }
-  vector<vector<int>> dp(ssize + 1, vector<int>(tsize + 1, 0));
-  repz(is, 1, ssize + 1) {
-    repz(it, 1, tsize + 1) {
-      if (s[is - 1] == t[it - 1]) chmax(dp[is][it], dp[is - 1][it - 1] + 1);
-      chmax(dp[is][it], dp[is - 1][it]);
-      chmax(dp[is][it], dp[is][it - 1]);
+  int n, m;
+  cin >> n >> m;
+  tsort t(n);
+  rep(i, m) {
+    int x, y;
+    cin >> x >> y;
+    x--;
+    y--;
+    t.add_edge(x, y);
+  }
+  t.sort();
+
+  vector<int> dp(n, 0);
+  for (int i : t.res) {
+    for (int to : t.G[i]) {
+      chmax(dp[to], dp[i] + 1);
     }
   }
-  int is = ssize, it = tsize;
-  vector<char> res;
-  while (is > 0 and it > 0) {
-    if (dp[is][it] == dp[is - 1][it]) {
-      is--;
-    } else if (dp[is][it] == dp[is][it - 1]) {
-      it--;
-    } else {
-      is--;
-      it--;
-      res.push_back(s[is]);
-    }
-  }
-  reverse(ALL(res));
-  for (char i : res) cout << i;
-  cout << endl;
+  cout << MAX(dp) << endl;
   ret;
 }

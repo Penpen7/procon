@@ -69,9 +69,9 @@ typedef pair<ll, ll> pl;
 const ld pi = acos(-1);
 // mod用
 // 1E+9 +7
-const ll mod = (int)1e+9 + 7;
+const ll mod = (ll)1e+9 + 7;
 // 1s間で可能なループ回数2E+8回
-// int        最大値2147483647         〜2E+9
+// ll        最大値2147483647         〜2E+9
 // long long  最大値9223372036854775807〜9E+18
 // 総和accumulate
 // 単純リストvector<type> push_back
@@ -87,41 +87,59 @@ const ll mod = (int)1e+9 + 7;
 // 小文字97-122(+32)
 //  priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>
 //  ba;
+struct mint {
+  ll x;  // typedef long long ll;
+  mint(ll x = 0) : x((x % mod + mod) % mod) {}
+  mint operator-() const { return mint(-x); }
+  mint &operator+=(const mint a) {
+    if ((x += a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint &operator-=(const mint a) {
+    if ((x += mod - a.x) >= mod) x -= mod;
+    return *this;
+  }
+  mint &operator*=(const mint a) {
+    (x *= a.x) %= mod;
+    return *this;
+  }
+  mint operator+(const mint a) const { return mint(*this) += a; }
+  mint operator-(const mint a) const { return mint(*this) -= a; }
+  mint operator*(const mint a) const { return mint(*this) *= a; }
+  mint pow(ll t) const {
+    if (!t) return 1;
+    mint a = pow(t >> 1);
+    a *= a;
+    if (t & 1) a *= *this;
+    return a;
+  }
+
+  // for prime mod
+  mint inv() const { return pow(mod - 2); }
+  mint &operator/=(const mint a) { return *this *= a.inv(); }
+  mint operator/(const mint a) const { return mint(*this) /= a; }
+};
+istream &operator>>(istream &is, const mint &a) { return is >> a.x; }
+ostream &operator<<(ostream &os, const mint &a) { return os << a.x; }
 signed main() {
   // faster
   // C言語流の入出力は使用できない
   ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
-  string s, t;
-  cin >> s >> t;
-  int ssize = SIZE(s), tsize = SIZE(t);
-  // if (ssize > tsize) {
-  //   swap(s, t);
-  //   swap(ssize, tsize);
-  // }
-  vector<vector<int>> dp(ssize + 1, vector<int>(tsize + 1, 0));
-  repz(is, 1, ssize + 1) {
-    repz(it, 1, tsize + 1) {
-      if (s[is - 1] == t[it - 1]) chmax(dp[is][it], dp[is - 1][it - 1] + 1);
-      chmax(dp[is][it], dp[is - 1][it]);
-      chmax(dp[is][it], dp[is][it - 1]);
-    }
+  ll n, m;
+  cin >> n >> m;
+  vector<bool> isbreak(n + 1, false);
+  rep(i, m) {
+    ll temp;
+    cin >> temp;
+    isbreak[temp] = true;
   }
-  int is = ssize, it = tsize;
-  vector<char> res;
-  while (is > 0 and it > 0) {
-    if (dp[is][it] == dp[is - 1][it]) {
-      is--;
-    } else if (dp[is][it] == dp[is][it - 1]) {
-      it--;
-    } else {
-      is--;
-      it--;
-      res.push_back(s[is]);
-    }
+  vector<mint> dp(n + 1, 0);
+  dp[0] = 1;
+  rep(i, n) {
+    if (i + 2 <= n and !isbreak[i + 2]) dp[i + 2] += dp[i];
+    if (i + 1 <= n and !isbreak[i + 1]) dp[i + 1] += dp[i];
   }
-  reverse(ALL(res));
-  for (char i : res) cout << i;
-  cout << endl;
+  cout << dp[n] << endl;
   ret;
 }
